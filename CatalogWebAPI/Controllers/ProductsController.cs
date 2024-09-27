@@ -15,12 +15,21 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public ActionResult<IEnumerable<Product>> GetAll()
         {
             var products = _context?.Products?.ToList();
             if (products is null)
                 return NotFound();
             return products;
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<Product> GetById(int id)
+        {
+            var product = _context?.Products?.FirstOrDefault(p => p.Id == id);
+            if (product is null)
+                return NotFound("Produto não encontrado!");
+            return Ok(product);
         }
     }
 }
