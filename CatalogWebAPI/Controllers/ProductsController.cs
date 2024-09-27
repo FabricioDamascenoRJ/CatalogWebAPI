@@ -23,13 +23,26 @@ namespace CatalogWebAPI.Controllers
             return products;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetProduct")]
         public ActionResult<Product> GetById(int id)
         {
             var product = _context?.Products?.FirstOrDefault(p => p.Id == id);
             if (product is null)
-                return NotFound("Produto não encontrado!");
+                return NotFound("Produto não encontrado.");
             return Ok(product);
+        }
+
+        [HttpPost]
+        public ActionResult Post(Product product)
+        {
+            if (product is null)
+                return BadRequest();
+
+            _context?.Products?.Add(product);
+            _context?.SaveChanges();
+
+            return new CreatedAtRouteResult("GetProduct",
+                new { id = product.Id }, product);
         }
     }
 }
