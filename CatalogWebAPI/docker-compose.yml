@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  catalogdb:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: r00t
+      MYSQL_DATABASE: catalogdb
+      MYSQL_USER: fmd
+      MYSQL_PASSWORD: r00t
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  webapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - catalogdb
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=catalogdb;Database=catalogdb;User=root;Password=r00t;"
+
+volumes:
+  mysql_data:
