@@ -77,13 +77,13 @@ namespace CatalogWebAPI.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CatalogWebAPI.Models.Product", b =>
                 {
                     b.HasOne("CatalogWebAPI.Models.Category", "Category")
-                        .WithMany("Products")
+                        .WithMany("Categories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -93,7 +93,7 @@ namespace CatalogWebAPI.Migrations
 
             modelBuilder.Entity("CatalogWebAPI.Models.Category", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("Categories");
                 });
 #pragma warning restore 612, 618
         }

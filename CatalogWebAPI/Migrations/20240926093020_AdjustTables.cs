@@ -12,14 +12,14 @@ namespace CatalogWebAPI.Migrations
         {
             migrationBuilder.AlterColumn<decimal>(
                 name: "Price",
-                table: "Products",
+                table: "Categories",
                 type: "decimal(10,2)",
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "decimal(65,30)");
 
             migrationBuilder.UpdateData(
-                table: "Products",
+                table: "Categories",
                 keyColumn: "Name",
                 keyValue: null,
                 column: "Name",
@@ -27,7 +27,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
-                table: "Products",
+                table: "Categories",
                 type: "varchar(80)",
                 maxLength: 80,
                 nullable: false,
@@ -38,7 +38,7 @@ namespace CatalogWebAPI.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.UpdateData(
-                table: "Products",
+                table: "Categories",
                 keyColumn: "ImageUrl",
                 keyValue: null,
                 column: "ImageUrl",
@@ -46,7 +46,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
-                table: "Products",
+                table: "Categories",
                 type: "varchar(300)",
                 maxLength: 300,
                 nullable: false,
@@ -57,7 +57,7 @@ namespace CatalogWebAPI.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.UpdateData(
-                table: "Products",
+                table: "Categories",
                 keyColumn: "Description",
                 keyValue: null,
                 column: "Description",
@@ -65,7 +65,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
-                table: "Products",
+                table: "Categories",
                 type: "varchar(300)",
                 maxLength: 300,
                 nullable: false,
@@ -119,7 +119,7 @@ namespace CatalogWebAPI.Migrations
         {
             migrationBuilder.AlterColumn<decimal>(
                 name: "Price",
-                table: "Products",
+                table: "Categories",
                 type: "decimal(65,30)",
                 nullable: false,
                 oldClrType: typeof(decimal),
@@ -127,7 +127,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
-                table: "Products",
+                table: "Categories",
                 type: "longtext",
                 nullable: true,
                 oldClrType: typeof(string),
@@ -138,7 +138,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "ImageUrl",
-                table: "Products",
+                table: "Categories",
                 type: "longtext",
                 nullable: true,
                 oldClrType: typeof(string),
@@ -149,7 +149,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
-                table: "Products",
+                table: "Categories",
                 type: "longtext",
                 nullable: true,
                 oldClrType: typeof(string),

@@ -33,7 +33,7 @@ namespace CatalogWebAPI.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Products",
+                name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -63,7 +63,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
-                table: "Products",
+                table: "Categories",
                 column: "CategoryId");
         }
 
@@ -71,7 +71,7 @@ namespace CatalogWebAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Categories");
