@@ -22,16 +22,15 @@ namespace CatalogWebAPI.Controllers
             try
             {
                 return _context.Categories
-                .Include(p => p.Products)
-                .AsNoTracking()
-                .ToList();
+                    .Include(p => p.Products)
+                    .AsNoTracking()
+                    .ToList();
             }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                         "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
-            
+            }            
         }
 
         [HttpGet]
@@ -40,8 +39,8 @@ namespace CatalogWebAPI.Controllers
             try
             {
                 return _context.Categories
-                .AsNoTracking()
-                .ToList();
+                    .AsNoTracking()
+                    .ToList();
             }
             catch (Exception)
             {
@@ -65,8 +64,7 @@ namespace CatalogWebAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                         "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
-            
+            }            
         }
 
         [HttpPost]
@@ -75,7 +73,7 @@ namespace CatalogWebAPI.Controllers
             try
             {
                 if (category is null)
-                    return BadRequest("Dados inválidos");
+                    return BadRequest("Falha ao cadastrar Categoria.");
 
                 _context.Categories.Add(category);
                 _context.SaveChanges();
@@ -87,8 +85,7 @@ namespace CatalogWebAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                         "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
-            
+            }            
         }
 
         [HttpPut("{id:int}")]
@@ -97,7 +94,7 @@ namespace CatalogWebAPI.Controllers
             try
             {
                 if (id != category.Id)
-                    return BadRequest("Dados inválidos");
+                    return BadRequest("Falha ao alterar Categoria.");
 
                 _context.Entry(category).State = EntityState.Modified;
                 _context.SaveChanges();
@@ -108,8 +105,7 @@ namespace CatalogWebAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                         "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
-            
+            }            
         }
 
         [HttpDelete("{id:int}")]
