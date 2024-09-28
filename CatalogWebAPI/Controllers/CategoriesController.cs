@@ -54,7 +54,7 @@ namespace CatalogWebAPI.Controllers
         {
             try
             {
-                var category = _context.Categories.FirstOrDefault(c => c.Id == id);
+                var category = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id);
 
                 if (category == null)
                     return NotFound($"Categoria com o id={id} não encontrada.");

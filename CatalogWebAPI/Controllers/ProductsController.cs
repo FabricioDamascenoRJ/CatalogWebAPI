@@ -41,7 +41,7 @@ namespace CatalogWebAPI.Controllers
         {
             try
             {
-                var product = _context.Products.FirstOrDefault(p => p.Id == id);
+                var product = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == id);
 
                 if (product is null)
                     return NotFound($"Produto com o id={id} não encontrado.");
