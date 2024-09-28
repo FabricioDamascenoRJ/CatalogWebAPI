@@ -16,13 +16,13 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetAll()
+        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
             try
             {
-                var products = _context.Products
+                var products = await _context.Products
                     .AsNoTracking()
-                    .ToList();
+                    .ToListAsync();
 
                 if (products is null)
                     return NotFound("Não foi encontrado nenhum produto.");
@@ -37,11 +37,13 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
-        public ActionResult<Product> GetById(int id)
+        public async Task<ActionResult<Product>> GetById(int id)
         {
             try
             {
-                var product = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == id);
+                var product = await _context.Products
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (product is null)
                     return NotFound($"Produto com o id={id} não encontrado.");

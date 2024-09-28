@@ -17,14 +17,14 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet("Products")]
-        public ActionResult<IEnumerable<Category>> GetCategoriesProducts()
+        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesProducts()
         {
             try
             {
-                return _context.Categories
+                return await _context.Categories
                     .Include(p => p.Products)
                     .AsNoTracking()
-                    .ToList();
+                    .ToListAsync();
             }
             catch (Exception)
             {
@@ -34,13 +34,13 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> GetAll()
+        public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
             try
             {
-                return _context.Categories
+                return await _context.Categories
                     .AsNoTracking()
-                    .ToList();
+                    .ToListAsync();
             }
             catch (Exception)
             {
@@ -50,11 +50,13 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
-        public ActionResult<Category> GetById(int id)
+        public async Task<ActionResult<Category>> GetById(int id)
         {
             try
             {
-                var category = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id);
+                var category = await _context.Categories
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == id);
 
                 if (category == null)
                     return NotFound($"Categoria com o id={id} não encontrada.");
