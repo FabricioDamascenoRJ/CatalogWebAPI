@@ -1,5 +1,6 @@
 ﻿using CatalogWebAPI.Context;
 using CatalogWebAPI.Models;
+using CatalogWebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,21 @@ namespace CatalogWebAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                         "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+            }
+        }
+
+        [HttpGet("UsingFromServices/{name}")]
+        public ActionResult<string> GetGreetingFromServices([FromServices] IMyService myService,
+                                    string name)
+        {
+            return myService.Greeting(name);
+        }
+
+        [HttpGet("NotUsingFromServices/{name}")]
+        public ActionResult<string> GetGreetingNotFromServices(IMyService myService,
+                                    string name)
+        {
+            return myService.Greeting(name);
         }
 
         [HttpGet]
