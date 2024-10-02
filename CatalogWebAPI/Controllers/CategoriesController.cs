@@ -54,6 +54,12 @@ namespace CatalogWebAPI.Controllers
         {
             try
             {
+                //throw new Exception("Exceção ao retornar o produto pelo Id");
+                //string[] teste = null;
+                //if (teste.Length > 0)
+                //{
+
+                //}
                 var category = await _context.Categories
                     .AsNoTracking()
                     .FirstOrDefaultAsync(c => c.Id == id);
