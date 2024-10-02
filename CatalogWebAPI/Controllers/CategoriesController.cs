@@ -1,4 +1,5 @@
 ﻿using CatalogWebAPI.Context;
+using CatalogWebAPI.Filters;
 using CatalogWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ApiLogginFilter))]
         public async Task<ActionResult<IEnumerable<Category>>> GetAll()
         {
             try

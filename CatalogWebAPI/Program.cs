@@ -1,5 +1,6 @@
 using CatalogWebAPI.Context;
 using CatalogWebAPI.Extensions;
+using CatalogWebAPI.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -19,6 +20,8 @@ var mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnecti
 builder.Services.AddDbContext<AppDbContext>(options => 
                     options.UseMySql(mySqlConnection,
                     ServerVersion.AutoDetect(mySqlConnection)));
+
+builder.Services.AddScoped<ApiLogginFilter>();
 
 var app = builder.Build();
 
