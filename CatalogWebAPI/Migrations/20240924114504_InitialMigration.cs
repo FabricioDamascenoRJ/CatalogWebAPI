@@ -21,7 +21,7 @@ namespace CatalogWebAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: true)
+                    Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ImageUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -33,17 +33,17 @@ namespace CatalogWebAPI.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "Products",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: true)
+                    Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
+                    Description = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Price = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
-                    ImageUrl = table.Column<string>(type: "longtext", nullable: true)
+                    ImageUrl = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Stock = table.Column<float>(type: "float", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -63,7 +63,7 @@ namespace CatalogWebAPI.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
-                table: "Categories",
+                table: "Products",
                 column: "CategoryId");
         }
 
@@ -71,7 +71,7 @@ namespace CatalogWebAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Categories");
