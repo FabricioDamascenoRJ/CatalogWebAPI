@@ -1,4 +1,6 @@
 ﻿using CatalogWebAPI.Context;
+using CatalogWebAPI.Filters;
+using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,122 +11,79 @@ namespace CatalogWebAPI.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProductRepository _repository;
         private readonly ILogger<ProductsController> _logger;
-        public ProductsController(AppDbContext context, ILogger<ProductsController> logger)
+        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
         {
-            _context = context;
+            _repository = repository;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+        [ServiceFilter(typeof(ApiLogginFilter))]
+        public ActionResult<IEnumerable<Product>> GetAll()
         {
-            try
-            {
-                var products = await _context.Products
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                if (products is null)
-                    return NotFound("Não foi encontrado nenhum produto.");
-
-                return products;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+            var products = _repository.GetProducts();
+            return Ok(products);            
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
-        public async Task<ActionResult<Product>> GetById(int id)
+        public ActionResult<Product> GetById(int id)
         {
-            try
+            var product = _repository.GetProduct(id);
+            if (product is null)
             {
-                var product = await _context.Products
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                if (product is null)
-                    return NotFound($"Produto com o id={id} não encontrado.");
-
-                return Ok(product);
+                _logger.LogWarning($"Produto com o id= {id} não encontrado...");
+                return NotFound($"Produto com o id={id} não encontrado.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+
+            return Ok(product);
+            
         }
 
         [HttpPost]
         public ActionResult Post(Product product)
-        {
-            try
+        {            
+            if (product is null)
             {
-                if (product is null)
-                    return BadRequest("Falha ao cadastrar Produto.");
-
-                _context.Products.Add(product);
-                _context.SaveChanges();
-
-                return new CreatedAtRouteResult("GetProduct",
-                    new { id = product.Id }, product);
+                _logger.LogWarning($"Dados Inválidos...");
+                return BadRequest("Falha ao cadastrar Produto.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+
+            var productCreated = _repository.Create(product);
+
+            return new CreatedAtRouteResult("GetProduct", new { id = productCreated.Id }, productCreated);
+            
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Product product) 
-        {
-            try
+        {            
+            if (id != product.Id)
             {
-                if (id != product.Id)
-                    return BadRequest("Falha ao alterar Produto.");
-
-                _context.Entry(product).State = EntityState.Modified;
-                _context.SaveChanges();
-
-                return Ok(product);
+                _logger.LogWarning($"Falha ao alterar Produto.");
+                return BadRequest("Falha ao alterar Produto.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+
+            _repository.Update(product);
+            return Ok(product);
+            
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id) 
         {
-            try
+            var product = _repository.GetProduct(id);
+
+            if (product is null)
             {
-                var product = _context.Products.FirstOrDefault(p => p.Id == id);
-
-                if (product is null)
-                    return NotFound("Falha ao deletar produto.");
-
-                _context.Products.Remove(product);
-                _context.SaveChanges();
-
-                return Ok(product);
+                _logger.LogWarning($"{nameof(Product)} não localizada");
+                return NotFound("Falha ao deletar produto.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+            
+            var productDeleted = _repository.Delete(id);
+            return Ok(productDeleted);
+            
         }
     }
 }

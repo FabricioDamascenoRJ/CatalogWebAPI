@@ -1,8 +1,7 @@
-﻿using CatalogWebAPI.Context;
-using CatalogWebAPI.Filters;
+﻿using CatalogWebAPI.Filters;
+using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CatalogWebAPI.Controllers
 {
@@ -10,153 +9,78 @@ namespace CatalogWebAPI.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        
+        private readonly ICategoryRepository _repository;
         private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(AppDbContext context, ILogger<CategoriesController> logger)
+        public CategoriesController(ICategoryRepository repository, ILogger<CategoriesController> logger)
         {
-            _context = context;
+            _repository = repository;
             _logger = logger;
-        }
-
-        [HttpGet("Products")]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesProducts()
-        {
-            try
-            {
-                _logger.LogInformation("================== GET api/categories/products ==========");
-
-                return await _context.Categories
-                    .Include(p => p.Products)
-                    .AsNoTracking()
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
-        }
+        }        
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
-        public async Task<ActionResult<IEnumerable<Category>>> GetAll()
+        public ActionResult<IEnumerable<Category>> GetAll()
         {
-            try
-            {
-                return await _context.Categories
-                    .AsNoTracking()
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+            var categories = _repository.GetCategories();
+            return Ok(categories);            
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
-        public async Task<ActionResult<Category>> GetById(int id)
+        public ActionResult<Category> GetById(int id)
         {
-            try
+            var category = _repository.GetCategory(id);
+
+            if (category is null)
             {
-                //throw new Exception("Exceção ao retornar o produto pelo Id");
-                //string[] teste = null;
-                //if (teste.Length > 0)
-                //{
-
-                //}
-
-                var category = await _context.Categories
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.Id == id);
-
-                if (category == null)
-                {
-                    _logger.LogWarning("=======================================");
-                    _logger.LogWarning($"Categoria com id= {id} não encontrada...");
-                    _logger.LogWarning("=======================================");
-                    return NotFound($"Categoria com o id={id} não encontrada.");
-                }
-                return Ok(category);
+                _logger.LogWarning($"Categoria com id= {id} não encontrada...");
+                return NotFound($"Categoria com o id={id} não encontrada.");
             }
-            catch (Exception)
-            {
-                _logger.LogError("=======================================================================");
-                _logger.LogError($"{StatusCodes.Status500InternalServerError} - Ocorreu um problema ao tratar a sua solicitação");
-                _logger.LogError("=======================================================================");
 
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+            return Ok(category);                   
         }
 
         [HttpPost]
         public ActionResult Post(Category category)
         {
-            try
+            if (category is null)
             {
-                if (category is null)
-                    return BadRequest("Falha ao cadastrar Categoria.");
-
-                _context.Categories.Add(category);
-                _context.SaveChanges();
-
-                return new CreatedAtRouteResult("GetCategories",
-                    new { id = category.Id }, category);
+                _logger.LogWarning($"Dados Inválidos...");
+                return BadRequest("Falha ao cadastrar Categoria.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+
+            var categoryCreated = _repository.Create(category);                
+
+            return new CreatedAtRouteResult("GetCategories", new { id = categoryCreated.Id }, categoryCreated);
+           
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Category category)
-        {
-            try
+        {            
+            if (id != category.Id)
             {
-                if (id != category.Id)
-                    return BadRequest("Falha ao alterar Categoria.");
-
-                _context.Entry(category).State = EntityState.Modified;
-                _context.SaveChanges();
-
-                return Ok(category);
+                _logger.LogWarning($"Dado Inválidos...");
+                return BadRequest("Falha ao alterar Categoria.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+
+            _repository.Update(category);
+            return Ok(category);                     
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            try
+            var category = _repository.GetCategory(id);
+
+            if (category is null)
             {
-                var category = _context.Categories.FirstOrDefault(c => c.Id == id);
-
-                if (category == null)
-                    return NotFound($"Categoria com id={id} não encontrada.");
-
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
-
-                return Ok(category);
+                _logger.LogWarning($"{nameof(Category)} não localizada");
+                return NotFound($"Categoria com id={id} não encontrada.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao processar a solicitação");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }
+
+            var categoryDeleted = _repository.Delete(id);
+            return Ok(categoryDeleted);            
         }
     }
 }

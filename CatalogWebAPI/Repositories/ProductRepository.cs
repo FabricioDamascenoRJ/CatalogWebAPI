@@ -20,7 +20,7 @@ public class ProductRepository : IProductRepository
         return _context.Products.ToList();
     }
 
-    public Product GetProductd(int id)
+    public Product GetProduct(int id)
     {
         return _context.Products.FirstOrDefault(p => p.Id == id);
     }
