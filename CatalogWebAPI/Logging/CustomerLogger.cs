@@ -33,7 +33,7 @@ public class CustomerLogger : ILogger
 
     private void WriteTexttoFile(string mensage)
     {
-        string pathFileLog = @"CatalogWebAPI_log.txt";
+        string pathFileLog = @"Logging\CatalogWebAPI_log.txt";
         using (StreamWriter streamWriter = new StreamWriter(pathFileLog, true))
         {
             try
