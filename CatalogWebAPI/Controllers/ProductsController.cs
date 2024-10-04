@@ -10,9 +10,11 @@ namespace CatalogWebAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public ProductsController(AppDbContext context)
+        private readonly ILogger _logger;
+        public ProductsController(AppDbContext context, ILogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]

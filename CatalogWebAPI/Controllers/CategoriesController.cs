@@ -11,10 +11,12 @@ namespace CatalogWebAPI.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger _logger;
 
-        public CategoriesController(AppDbContext context)
+        public CategoriesController(AppDbContext context, ILogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet("Products")]
@@ -22,6 +24,8 @@ namespace CatalogWebAPI.Controllers
         {
             try
             {
+                _logger.LogInformation("================== GET api/categories/products ==========");
+
                 return await _context.Categories
                     .Include(p => p.Products)
                     .AsNoTracking()
@@ -67,11 +71,20 @@ namespace CatalogWebAPI.Controllers
                     .FirstOrDefaultAsync(c => c.Id == id);
 
                 if (category == null)
+                {
+                    _logger.LogWarning("=======================================");
+                    _logger.LogWarning($"Categoria com id= {id} não encontrada...");
+                    _logger.LogWarning("=======================================");
                     return NotFound($"Categoria com o id={id} não encontrada.");
+                }
                 return Ok(category);
             }
             catch (Exception)
             {
+                _logger.LogError("=======================================================================");
+                _logger.LogError($"{StatusCodes.Status500InternalServerError} - Ocorreu um problema ao tratar a sua solicitação");
+                _logger.LogError("=======================================================================");
+
                 return StatusCode(StatusCodes.Status500InternalServerError,
                         "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
             }            
