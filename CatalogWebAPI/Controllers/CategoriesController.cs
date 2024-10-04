@@ -10,7 +10,7 @@ namespace CatalogWebAPI.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        
         private readonly ILogger<CategoriesController> _logger;
 
         public CategoriesController(AppDbContext context, ILogger<CategoriesController> logger)
