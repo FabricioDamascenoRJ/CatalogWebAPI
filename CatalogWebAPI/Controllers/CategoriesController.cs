@@ -11,9 +11,9 @@ namespace CatalogWebAPI.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(AppDbContext context, ILogger logger)
+        public CategoriesController(AppDbContext context, ILogger<CategoriesController> logger)
         {
             _context = context;
             _logger = logger;
@@ -24,18 +24,19 @@ namespace CatalogWebAPI.Controllers
         {
             try
             {
-                _logger.LogInformation("================== GET api/categories/products ==========");
+               // _logger.LogInformation("================== GET api/categories/products ==========");
 
                 return await _context.Categories
                     .Include(p => p.Products)
                     .AsNoTracking()
                     .ToListAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpGet]
@@ -48,11 +49,12 @@ namespace CatalogWebAPI.Controllers
                     .AsNoTracking()
                     .ToListAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
@@ -101,14 +103,15 @@ namespace CatalogWebAPI.Controllers
                 _context.Categories.Add(category);
                 _context.SaveChanges();
 
-                return new CreatedAtRouteResult("GetCategory",
+                return new CreatedAtRouteResult("GetCategories",
                     new { id = category.Id }, category);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -124,11 +127,12 @@ namespace CatalogWebAPI.Controllers
 
                 return Ok(category);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpDelete("{id:int}")]
@@ -146,10 +150,11 @@ namespace CatalogWebAPI.Controllers
 
                 return Ok(category);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
             }
         }
     }
