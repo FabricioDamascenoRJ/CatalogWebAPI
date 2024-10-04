@@ -398,4 +398,3 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /CatalogWebAPI/Logging/CatalogWebAPI_log.txt
-/CatalogWebAPI/CatalogWebAPI_log.txt
