@@ -24,7 +24,7 @@ namespace CatalogWebAPI.Controllers
         {
             try
             {
-               // _logger.LogInformation("================== GET api/categories/products ==========");
+                _logger.LogInformation("================== GET api/categories/products ==========");
 
                 return await _context.Categories
                     .Include(p => p.Products)
@@ -68,6 +68,7 @@ namespace CatalogWebAPI.Controllers
                 //{
 
                 //}
+
                 var category = await _context.Categories
                     .AsNoTracking()
                     .FirstOrDefaultAsync(c => c.Id == id);

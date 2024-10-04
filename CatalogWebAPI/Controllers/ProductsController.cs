@@ -10,8 +10,8 @@ namespace CatalogWebAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILogger _logger;
-        public ProductsController(AppDbContext context, ILogger logger)
+        private readonly ILogger<ProductsController> _logger;
+        public ProductsController(AppDbContext context, ILogger<ProductsController> logger)
         {
             _context = context;
             _logger = logger;
@@ -31,11 +31,12 @@ namespace CatalogWebAPI.Controllers
 
                 return products;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
@@ -52,11 +53,12 @@ namespace CatalogWebAPI.Controllers
 
                 return Ok(product);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpPost]
@@ -73,11 +75,12 @@ namespace CatalogWebAPI.Controllers
                 return new CreatedAtRouteResult("GetProduct",
                     new { id = product.Id }, product);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -93,11 +96,12 @@ namespace CatalogWebAPI.Controllers
 
                 return Ok(product);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
 
         [HttpDelete("{id:int}")]
@@ -115,11 +119,12 @@ namespace CatalogWebAPI.Controllers
 
                 return Ok(product);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao processar a solicitação");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                                        "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
-            }            
+                    "Ocorreu um erro interno ao tratar a sua solicitação. Favor contactar o Adminstrador do sistema.");
+            }
         }
     }
 }
