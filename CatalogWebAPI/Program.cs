@@ -1,6 +1,7 @@
 using CatalogWebAPI.Context;
 using CatalogWebAPI.Extensions;
 using CatalogWebAPI.Filters;
+using CatalogWebAPI.Logging;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -22,6 +23,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                     ServerVersion.AutoDetect(mySqlConnection)));
 
 builder.Services.AddScoped<ApiLogginFilter>();
+
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 var app = builder.Build();
 
