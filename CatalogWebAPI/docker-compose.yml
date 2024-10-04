@@ -1,28 +1,28 @@
 version: '3.8'
-
 services:
-  catalogdb:
+  db:
     image: mysql:8.0
+    container_name: mysql-container
     environment:
-      MYSQL_ROOT_PASSWORD: r00t
-      MYSQL_DATABASE: catalogdb
-      MYSQL_USER: fmd
-      MYSQL_PASSWORD: r00t
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+    command: --default-authentication-plugin=mysql_native_password
     ports:
       - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  webapi:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:80"
-    depends_on:
-      - catalogdb
+    restart: always
+  phpmyadmin-container:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-container
     environment:
-      ConnectionStrings__DefaultConnection: "Server=catalogdb;Database=catalogdb;User=root;Password=r00t;"
-
-volumes:
-  mysql_data:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql-container
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    restart: always
