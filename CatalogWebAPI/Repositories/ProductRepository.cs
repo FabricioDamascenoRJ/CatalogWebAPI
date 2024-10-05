@@ -8,27 +8,32 @@ namespace CatalogWebAPI.Repositories;
 
 public class ProductRepository : IProductRepository
 {
-    private readonly AppDbContext _context;
+    public readonly AppDbContext _context;
 
     public ProductRepository(AppDbContext context)
     {
         _context = context;
     }
 
-    public IEnumerable<Product> GetProducts()
+    public IQueryable<Product> GetProducts()
     {
-        return _context.Products.ToList();
+        return _context.Products;
     }
 
     public Product GetProduct(int id)
     {
-        return _context.Products.FirstOrDefault(p => p.Id == id);
+        var product = _context.Products.FirstOrDefault(p => p.Id == id);
+
+        if (product is null)
+            throw new InvalidOperationException("Produto não localizado");
+
+        return product;
     }
 
     public Product Create(Product product)
     {
-        if(product is null)
-            throw new ArgumentNullException(nameof(product));
+        if (product is null)
+            throw new InvalidOperationException("Produto não localizado");
 
         _context.Products.Add(product);
         _context.SaveChanges();
@@ -36,29 +41,32 @@ public class ProductRepository : IProductRepository
         return product;
     }
 
-    public Product Update(Product product)
+    public bool Update(Product product)
     {
-        if(product is null)
-            throw new ArgumentNullException(nameof(product));
+        if (product is null)
+            throw new InvalidOperationException("Produto não localizado");
 
-        _context.Entry(product).State = EntityState.Modified;
-        _context.SaveChanges();
-        
-        return product;
+        if(_context.Products.Any(p => p.Id == product.Id))
+        {
+            _context.Products.Update(product);
+            _context.SaveChanges();
+            return true;
+        }
+        return false;
     }
-    
 
-    public Product Delete(int id)
+    public bool Delete(int id)
     {
         var product = _context.Products.Find(id);
-        
-        if(product is null)
-            throw new ArgumentNullException(nameof(product));
 
-        _context.Products.Remove(product);
-        _context.SaveChanges();
-
-        return product;
-    }      
+        if(product is not null)
+        {
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+            return true;
+        }
+        return false;
+    }
+    
 }
 

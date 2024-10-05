@@ -1,9 +1,7 @@
-﻿using CatalogWebAPI.Context;
-using CatalogWebAPI.Filters;
+﻿using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CatalogWebAPI.Controllers
 {
@@ -23,7 +21,9 @@ namespace CatalogWebAPI.Controllers
         [ServiceFilter(typeof(ApiLogginFilter))]
         public ActionResult<IEnumerable<Product>> GetAll()
         {
-            var products = _repository.GetProducts();
+            var products = _repository.GetProducts().ToList();
+            if(products is null)
+                return NotFound();
             return Ok(products);            
         }
 
@@ -33,10 +33,9 @@ namespace CatalogWebAPI.Controllers
             var product = _repository.GetProduct(id);
             if (product is null)
             {
-                _logger.LogWarning($"Produto com o id= {id} não encontrado...");
-                return NotFound($"Produto com o id={id} não encontrado.");
+                _logger.LogWarning("Produto não encontrado...");
+                return NotFound("Produto não encontrado...");
             }
-
             return Ok(product);
             
         }
@@ -50,9 +49,10 @@ namespace CatalogWebAPI.Controllers
                 return BadRequest("Falha ao cadastrar Produto.");
             }
 
-            var productCreated = _repository.Create(product);
+            var newProduct = _repository.Create(product);
 
-            return new CreatedAtRouteResult("GetProduct", new { id = productCreated.Id }, productCreated);
+            return new CreatedAtRouteResult("GetProduct", 
+                new { id = newProduct.Id }, newProduct);
             
         }
 
@@ -65,25 +65,23 @@ namespace CatalogWebAPI.Controllers
                 return BadRequest("Falha ao alterar Produto.");
             }
 
-            _repository.Update(product);
-            return Ok(product);
-            
+            bool updated = _repository.Update(product);
+            if(updated) 
+                return Ok(product);
+            else
+                return StatusCode(500, $"Falha ao atualizar produto: {nameof(Product)}");            
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id) 
         {
-            var product = _repository.GetProduct(id);
+            bool deleted = _repository.Delete(id);          
 
-            if (product is null)
-            {
-                _logger.LogWarning($"{nameof(Product)} não localizada");
-                return NotFound("Falha ao deletar produto.");
-            }
-            
-            var productDeleted = _repository.Delete(id);
-            return Ok(productDeleted);
-            
+            if (deleted)
+                return Ok(deleted);
+            else
+                return StatusCode(500, $"Falha ao excluir produto: {nameof(Product)}");
+
         }
     }
 }
