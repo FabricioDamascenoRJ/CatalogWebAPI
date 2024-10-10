@@ -1,7 +1,6 @@
 ﻿using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
-using CatalogWebAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogWebAPI.Controllers
@@ -10,27 +9,28 @@ namespace CatalogWebAPI.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly IRepository<Category> _repository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(ICategoryRepository repository, ILogger<CategoriesController> logger)
+        public CategoriesController(ILogger<CategoriesController> logger, IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+
             _logger = logger;
-        }        
+            _unitOfWork = unitOfWork;
+        }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
         public ActionResult<IEnumerable<Category>> GetAll()
         {
-            var categories = _repository.GetAll();
+            var categories = _unitOfWork.CategoryRepository.GetAll();
             return Ok(categories);            
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
         public ActionResult<Category> GetById(int id)
         {
-            var category = _repository.Get(c => c.Id == id);
+            var category = _unitOfWork.CategoryRepository.Get(c => c.Id == id);
 
             if (category is null)
             {
@@ -50,7 +50,8 @@ namespace CatalogWebAPI.Controllers
                 return BadRequest("Falha ao cadastrar Categoria.");
             }
 
-            var categoryCreated = _repository.Create(category);                
+            var categoryCreated = _unitOfWork.CategoryRepository.Create(category);  
+            _unitOfWork.Commit();
 
             return new CreatedAtRouteResult("GetCategories", new { id = categoryCreated.Id }, categoryCreated);
            
@@ -65,14 +66,15 @@ namespace CatalogWebAPI.Controllers
                 return BadRequest("Falha ao alterar Categoria.");
             }
 
-            _repository.Update(category);
+            _unitOfWork.CategoryRepository.Update(category);
+            _unitOfWork.Commit();
             return Ok(category);                     
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var category = _repository.Get(c => c.Id == id);
+            var category = _unitOfWork.CategoryRepository.Get(c => c.Id == id);
 
             if (category is null)
             {
@@ -80,7 +82,8 @@ namespace CatalogWebAPI.Controllers
                 return NotFound($"Categoria com id={id} não encontrada.");
             }
 
-            var categoryDeleted = _repository.Delete(category);
+            var categoryDeleted = _unitOfWork.CategoryRepository.Delete(category);
+            _unitOfWork.Commit();
             return Ok(categoryDeleted);            
         }
     }

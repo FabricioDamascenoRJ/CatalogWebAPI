@@ -1,5 +1,4 @@
 ﻿using CatalogWebAPI.Models;
-using CatalogWebAPI.Repositories;
 
 namespace CatalogWebAPI.Interfaces;
 
