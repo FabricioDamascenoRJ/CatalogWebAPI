@@ -1,6 +1,7 @@
 ﻿using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
+using CatalogWebAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogWebAPI.Controllers
@@ -9,19 +10,28 @@ namespace CatalogWebAPI.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _repository;
-        private readonly ILogger<ProductsController> _logger;
-        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
+        private readonly IRepository<Product> _repository;
+        private readonly IProductRepository _productRepository;
+        public ProductsController(IRepository<Product> repository, 
+            IProductRepository productRepository)
         {
+            _productRepository = productRepository;
             _repository = repository;
-            _logger = logger;
+        }
+
+        [HttpGet("products/{id}")]
+        public ActionResult<IEnumerable<Product>> GetProductsCategory(int id)
+        {
+            var products = _productRepository.GetProductsByCategory(id);
+            if(products is null)
+                return NotFound();
+            return Ok(products);
         }
 
         [HttpGet]
-        [ServiceFilter(typeof(ApiLogginFilter))]
         public ActionResult<IEnumerable<Product>> GetAll()
         {
-            var products = _repository.GetProducts().ToList();
+            var products = _repository.GetAll();
             if(products is null)
                 return NotFound();
             return Ok(products);            
@@ -30,24 +40,17 @@ namespace CatalogWebAPI.Controllers
         [HttpGet("{id:int}", Name = "GetProduct")]
         public ActionResult<Product> GetById(int id)
         {
-            var product = _repository.GetProduct(id);
-            if (product is null)
-            {
-                _logger.LogWarning("Produto não encontrado...");
-                return NotFound("Produto não encontrado...");
-            }
-            return Ok(product);
-            
+            var product = _repository.Get(p => p.Id == id);
+            if (product is null)            
+                return NotFound("Produto não encontrado...");            
+            return Ok(product);            
         }
 
         [HttpPost]
         public ActionResult Post(Product product)
         {            
             if (product is null)
-            {
-                _logger.LogWarning($"Dados Inválidos...");
-                return BadRequest("Falha ao cadastrar Produto.");
-            }
+                return BadRequest("Falha ao cadastrar Produto.");            
 
             var newProduct = _repository.Create(product);
 
@@ -60,28 +63,23 @@ namespace CatalogWebAPI.Controllers
         public ActionResult Put(int id, Product product) 
         {            
             if (id != product.Id)
-            {
-                _logger.LogWarning($"Falha ao alterar Produto.");
-                return BadRequest("Falha ao alterar Produto.");
-            }
+                return BadRequest("Falha ao alterar Produto.");            
 
-            bool updated = _repository.Update(product);
-            if(updated) 
-                return Ok(product);
-            else
-                return StatusCode(500, $"Falha ao atualizar produto: {nameof(Product)}");            
+            var productUpdated = _repository.Update(product);
+            
+            return Ok(productUpdated);                       
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id) 
         {
-            bool deleted = _repository.Delete(id);          
+            var product = _repository.Get(p =>  id == p.Id);
 
-            if (deleted)
-                return Ok(deleted);
-            else
-                return StatusCode(500, $"Falha ao excluir produto: {nameof(Product)}");
+            if (product is null)
+                return NotFound("Produto não encontrado...");
 
+            var productDeleted = _repository.Delete(product);
+            return Ok(productDeleted);
         }
     }
 }

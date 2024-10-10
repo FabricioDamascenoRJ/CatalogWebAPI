@@ -1,13 +1,9 @@
 ﻿using CatalogWebAPI.Models;
+using CatalogWebAPI.Repositories;
 
 namespace CatalogWebAPI.Interfaces;
 
-public interface IProductRepository
+public interface IProductRepository : IRepository<Product>
 {
-    IQueryable<Product> GetProducts();
-    Product GetProduct(int id);
-    Product Create(Product product);
-    bool Update(Product product);
-    bool Delete(int id);
-
+    IEnumerable<Product> GetProductsByCategory(int id);
 }

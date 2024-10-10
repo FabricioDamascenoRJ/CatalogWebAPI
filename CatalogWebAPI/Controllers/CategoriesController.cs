@@ -1,6 +1,7 @@
 ﻿using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
+using CatalogWebAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogWebAPI.Controllers
@@ -9,7 +10,7 @@ namespace CatalogWebAPI.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategoryRepository _repository;
+        private readonly IRepository<Category> _repository;
         private readonly ILogger<CategoriesController> _logger;
 
         public CategoriesController(ICategoryRepository repository, ILogger<CategoriesController> logger)
@@ -22,14 +23,14 @@ namespace CatalogWebAPI.Controllers
         [ServiceFilter(typeof(ApiLogginFilter))]
         public ActionResult<IEnumerable<Category>> GetAll()
         {
-            var categories = _repository.GetCategories();
+            var categories = _repository.GetAll();
             return Ok(categories);            
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
         public ActionResult<Category> GetById(int id)
         {
-            var category = _repository.GetCategory(id);
+            var category = _repository.Get(c => c.Id == id);
 
             if (category is null)
             {
@@ -71,7 +72,7 @@ namespace CatalogWebAPI.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var category = _repository.GetCategory(id);
+            var category = _repository.Get(c => c.Id == id);
 
             if (category is null)
             {
@@ -79,7 +80,7 @@ namespace CatalogWebAPI.Controllers
                 return NotFound($"Categoria com id={id} não encontrada.");
             }
 
-            var categoryDeleted = _repository.Delete(id);
+            var categoryDeleted = _repository.Delete(category);
             return Ok(categoryDeleted);            
         }
     }
