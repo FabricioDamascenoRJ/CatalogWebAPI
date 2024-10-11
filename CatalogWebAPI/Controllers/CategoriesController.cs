@@ -1,7 +1,9 @@
-﻿using CatalogWebAPI.Filters;
+﻿using CatalogWebAPI.DTOs;
+using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
 namespace CatalogWebAPI.Controllers
 {
@@ -21,14 +23,30 @@ namespace CatalogWebAPI.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
-        public ActionResult<IEnumerable<Category>> GetAll()
+        public ActionResult<IEnumerable<CategoryDTO>> GetAll()
         {
             var categories = _unitOfWork.CategoryRepository.GetAll();
-            return Ok(categories);            
+
+            if (categories == null)
+                return NotFound("Não existem Categorias cadastras...");
+
+            var categoriesDTO = new List<CategoryDTO>();
+            foreach (var category in categories)
+            {
+                var categoryDTO = new CategoryDTO()
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    ImageUrl = category.ImageUrl,
+                };
+                categoriesDTO.Add(categoryDTO);
+            }
+
+            return Ok(categoriesDTO);            
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
-        public ActionResult<Category> GetById(int id)
+        public ActionResult<CategoryDTO> GetById(int id)
         {
             var category = _unitOfWork.CategoryRepository.Get(c => c.Id == id);
 
@@ -38,41 +56,79 @@ namespace CatalogWebAPI.Controllers
                 return NotFound($"Categoria com o id={id} não encontrada.");
             }
 
+            var categotyDTO = new CategoryDTO()
+            {
+                Id = category.Id,
+                Name = category.Name,
+                ImageUrl = category.ImageUrl,
+            };
+
             return Ok(category);                   
         }
 
         [HttpPost]
-        public ActionResult Post(Category category)
+        public ActionResult<CategoryDTO> Post(CategoryDTO categoryDTO)
         {
-            if (category is null)
+            if (categoryDTO is null)
             {
                 _logger.LogWarning($"Dados Inválidos...");
                 return BadRequest("Falha ao cadastrar Categoria.");
             }
 
+            var category = new Category()
+            {
+                Id = categoryDTO.Id,
+                Name = categoryDTO.Name,
+                ImageUrl = categoryDTO.ImageUrl,
+            };
+
             var categoryCreated = _unitOfWork.CategoryRepository.Create(category);  
             _unitOfWork.Commit();
 
-            return new CreatedAtRouteResult("GetCategories", new { id = categoryCreated.Id }, categoryCreated);
+            var newCategoryDTO = new CategoryDTO()
+            {
+                Id = categoryCreated.Id,
+                Name = categoryCreated.Name,
+                ImageUrl = categoryCreated.ImageUrl,
+            };
+
+            return new CreatedAtRouteResult("GetCategories", 
+                new { id = newCategoryDTO.Id },
+                newCategoryDTO);
            
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Category category)
+        public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
         {            
-            if (id != category.Id)
+            if (id != categoryDTO.Id)
             {
                 _logger.LogWarning($"Dado Inválidos...");
                 return BadRequest("Falha ao alterar Categoria.");
             }
 
-            _unitOfWork.CategoryRepository.Update(category);
+            var category = new Category()
+            {
+                Id = categoryDTO.Id,
+                Name = categoryDTO.Name,
+                ImageUrl = categoryDTO.ImageUrl,
+            };
+
+            var categoryUpdated = _unitOfWork.CategoryRepository.Update(category);
             _unitOfWork.Commit();
-            return Ok(category);                     
+
+            var categoryUpdatedDTO = new CategoryDTO()
+            {
+                Id = categoryUpdated.Id,
+                Name = categoryUpdated.Name,
+                ImageUrl = categoryUpdated.ImageUrl,
+            };
+
+            return Ok(categoryUpdatedDTO);                     
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public ActionResult<CategoryDTO> Delete(int id)
         {
             var category = _unitOfWork.CategoryRepository.Get(c => c.Id == id);
 
@@ -84,7 +140,15 @@ namespace CatalogWebAPI.Controllers
 
             var categoryDeleted = _unitOfWork.CategoryRepository.Delete(category);
             _unitOfWork.Commit();
-            return Ok(categoryDeleted);            
+
+            var categoryDeletedDTO = new CategoryDTO()
+            {
+                Id = categoryDeleted.Id,
+                Name = categoryDeleted.Name,
+                ImageUrl = categoryDeleted.ImageUrl,
+            };
+
+            return Ok(categoryDeletedDTO);            
         }
     }
 }
