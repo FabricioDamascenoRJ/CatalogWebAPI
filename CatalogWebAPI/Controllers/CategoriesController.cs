@@ -1,4 +1,5 @@
 ﻿using CatalogWebAPI.DTOs;
+using CatalogWebAPI.DTOs.Mappings;
 using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
@@ -30,17 +31,7 @@ namespace CatalogWebAPI.Controllers
             if (categories == null)
                 return NotFound("Não existem Categorias cadastras...");
 
-            var categoriesDTO = new List<CategoryDTO>();
-            foreach (var category in categories)
-            {
-                var categoryDTO = new CategoryDTO()
-                {
-                    Id = category.Id,
-                    Name = category.Name,
-                    ImageUrl = category.ImageUrl,
-                };
-                categoriesDTO.Add(categoryDTO);
-            }
+            var categoriesDTO = categories.ToCategoryDTOList();
 
             return Ok(categoriesDTO);            
         }
@@ -56,14 +47,8 @@ namespace CatalogWebAPI.Controllers
                 return NotFound($"Categoria com o id={id} não encontrada.");
             }
 
-            var categotyDTO = new CategoryDTO()
-            {
-                Id = category.Id,
-                Name = category.Name,
-                ImageUrl = category.ImageUrl,
-            };
-
-            return Ok(category);                   
+            var categoryDTO = category.ToCategoryDTO();
+            return Ok(categoryDTO);                   
         }
 
         [HttpPost]
@@ -75,25 +60,15 @@ namespace CatalogWebAPI.Controllers
                 return BadRequest("Falha ao cadastrar Categoria.");
             }
 
-            var category = new Category()
-            {
-                Id = categoryDTO.Id,
-                Name = categoryDTO.Name,
-                ImageUrl = categoryDTO.ImageUrl,
-            };
+            var category = categoryDTO.ToCategory();
 
             var categoryCreated = _unitOfWork.CategoryRepository.Create(category);  
             _unitOfWork.Commit();
 
-            var newCategoryDTO = new CategoryDTO()
-            {
-                Id = categoryCreated.Id,
-                Name = categoryCreated.Name,
-                ImageUrl = categoryCreated.ImageUrl,
-            };
+            var newCategoryDTO = categoryCreated.ToCategoryDTO();
 
             return new CreatedAtRouteResult("GetCategories", 
-                new { id = newCategoryDTO.Id },
+                new { id = newCategoryDTO?.Id },
                 newCategoryDTO);
            
         }
@@ -107,22 +82,12 @@ namespace CatalogWebAPI.Controllers
                 return BadRequest("Falha ao alterar Categoria.");
             }
 
-            var category = new Category()
-            {
-                Id = categoryDTO.Id,
-                Name = categoryDTO.Name,
-                ImageUrl = categoryDTO.ImageUrl,
-            };
+            var category = categoryDTO.ToCategory();
 
             var categoryUpdated = _unitOfWork.CategoryRepository.Update(category);
             _unitOfWork.Commit();
 
-            var categoryUpdatedDTO = new CategoryDTO()
-            {
-                Id = categoryUpdated.Id,
-                Name = categoryUpdated.Name,
-                ImageUrl = categoryUpdated.ImageUrl,
-            };
+            var categoryUpdatedDTO = categoryUpdated.ToCategoryDTO();
 
             return Ok(categoryUpdatedDTO);                     
         }
@@ -141,12 +106,7 @@ namespace CatalogWebAPI.Controllers
             var categoryDeleted = _unitOfWork.CategoryRepository.Delete(category);
             _unitOfWork.Commit();
 
-            var categoryDeletedDTO = new CategoryDTO()
-            {
-                Id = categoryDeleted.Id,
-                Name = categoryDeleted.Name,
-                ImageUrl = categoryDeleted.ImageUrl,
-            };
+            var categoryDeletedDTO = categoryDeleted.ToCategoryDTO();
 
             return Ok(categoryDeletedDTO);            
         }
