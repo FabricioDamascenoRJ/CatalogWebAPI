@@ -1,4 +1,5 @@
 using CatalogWebAPI.Context;
+using CatalogWebAPI.DTOs;
 using CatalogWebAPI.Extensions;
 using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
@@ -34,6 +35,8 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 {
     LogLevel = LogLevel.Information
 }));
+
+builder.Services.AddAutoMapper(typeof(ProductDTOMappingProfile));
 
 var app = builder.Build();
 
