@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace CatalogWebAPI.Logging;
+﻿namespace CatalogWebAPI.Logging;
 
 public class CustomerLogger : ILogger
 {
@@ -13,9 +11,9 @@ public class CustomerLogger : ILogger
         loggerConfig = config;
     }
 
-    public IDisposable BeginScope<TState>(TState? state)
+    IDisposable ILogger.BeginScope<TState>(TState state)
     {
-        return null;
+        return null!;
     }
 
     public bool IsEnabled(LogLevel logLevel)
@@ -26,18 +24,18 @@ public class CustomerLogger : ILogger
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
             Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        string mensage = $"{logLevel.ToString()}: {eventId.Id} - {formatter(state, exception)}";
-        WriteTexttoFile(mensage);
+        string message = $"{logLevel.ToString()}: {eventId.Id} - {formatter(state, exception)}";
+        WriteTexttoFile(message);
     }
 
-    private void WriteTexttoFile(string mensage)
+    private void WriteTexttoFile(string message)
     {
         string pathFileLog = @"Logging\CatalogWebAPI_log.txt";
         using (StreamWriter streamWriter = new StreamWriter(pathFileLog, true))
         {
             try
             {
-                streamWriter.WriteLine(mensage);
+                streamWriter.WriteLine(message);
                 streamWriter.Close();
             }
             catch (Exception)
