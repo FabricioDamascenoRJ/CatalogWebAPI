@@ -4,8 +4,10 @@ using CatalogWebAPI.DTOs.Request;
 using CatalogWebAPI.DTOs.Response;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
+using CatalogWebAPI.Pagination;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace CatalogWebAPI.Controllers
 {
@@ -29,6 +31,16 @@ namespace CatalogWebAPI.Controllers
                 return NotFound();
 
             var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return Ok(productsDTO);
+        }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductsParameters productsParameters)
+        {
+            var products = _unitOfWork.ProductRepository.GetProducts(productsParameters);
+
+            var productsDTO = _mapper.Map<IEnumerable<(ProductDTO, int)>>(products);
+
             return Ok(productsDTO);
         }
 
