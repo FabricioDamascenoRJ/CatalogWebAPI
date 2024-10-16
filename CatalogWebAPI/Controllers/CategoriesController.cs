@@ -3,7 +3,9 @@ using CatalogWebAPI.DTOs.Mappings;
 using CatalogWebAPI.Filters;
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
+using CatalogWebAPI.Pagination;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Xml.Linq;
 
 namespace CatalogWebAPI.Controllers
@@ -20,6 +22,29 @@ namespace CatalogWebAPI.Controllers
 
             _logger = logger;
             _unitOfWork = unitOfWork;
+        }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<Category>> Get([FromQuery]
+                    CategoriesParamaters categoriesParamaters)
+        {
+            var categories = _unitOfWork.CategoryRepository.GetCategories(categoriesParamaters);
+
+            var metadata = new
+            {
+                categories.TotalCount,
+                categories.PageSize,
+                categories.CurrentPage,
+                categories.TotalPages,
+                categories.HasNext,
+                categories.HasPrevious,
+            };
+
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata)); 
+
+            var categoriesDTO = categories.ToCategoryDTOList();
+
+            return Ok(categoriesDTO);
         }
 
         [HttpGet]

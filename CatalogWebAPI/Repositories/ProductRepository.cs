@@ -2,8 +2,6 @@
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
 using CatalogWebAPI.Pagination;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace CatalogWebAPI.Repositories;
 
@@ -12,14 +10,14 @@ public class ProductRepository : Repository<Product>, IProductRepository
 {
     public ProductRepository(AppDbContext context) : base(context)
     {        
-    }
+    }    
 
-    public IEnumerable<Product> GetProducts(ProductsParameters productsParams)
+    public PagedList<Product> GetProducts(ProductsParameters productsParams)
     {
-        return GetAll()
-            .OrderBy(p => p.Name)
-            .Skip((productsParams.PageNumber - 1) * productsParams.PageSize)
-            .Take(productsParams.PageSize).ToList();
+        var products = GetAll().OrderBy(p => p.Id).AsQueryable();
+        var productsOrdered = PagedList<Product>.ToPagedList(products, productsParams.PageNumber, productsParams.PageSize);
+
+        return productsOrdered;
     }
 
     public IEnumerable<Product> GetProductsByCategory(int id)
