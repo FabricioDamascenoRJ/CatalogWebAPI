@@ -39,22 +39,19 @@ namespace CatalogWebAPI.Controllers
         public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductsParameters productsParameters)
         {
             var products = _unitOfWork.ProductRepository.GetProducts(productsParameters);
+            return GetProducts(products);
+        }
 
-            var metadata = new
-            {
-                products.TotalCount,
-                products.PageSize,
-                products.CurrentPage,
-                products.TotalPages,
-                products.HasNext,
-                products.HasPrevious,
-            };
+        private ActionResult<IEnumerable<ProductDTO>> GetProducts(PagedList<Product> products)
+        {
+            return GetProducts(products);
+        }
 
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            var productsDTO = _mapper.Map<IEnumerable<(ProductDTO, int)>>(products);
-
-            return Ok(productsDTO);
+        [HttpGet("filter/price/pagination")]
+        public ActionResult<IEnumerable<ProductDTO>> GetProductsFilterPrice([FromQuery] ProductsFilterPrice productsFilterParameters)
+        {
+            var products = _unitOfWork.ProductRepository.GetProductsFilterPrice(productsFilterParameters);
+            return GetProducts(products);
         }
 
         [HttpGet]
