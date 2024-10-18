@@ -16,4 +16,16 @@ public class CategoryRepository(AppDbContext context) : Repository<Category>(con
         return categoriesOrdered;
     }
 
+    public PagedList<Category> GetCategoriesFilterName(CategoriesFilterName categoriesParams)
+    {
+        var catergories = GetAll().AsQueryable();
+
+        if(!string.IsNullOrEmpty(categoriesParams.Name))
+            catergories = catergories.Where(c => c.Name == categoriesParams.Name);
+
+        var filteredCategories = PagedList<Category>.ToPagedList(catergories,
+                categoriesParams.PageNumber, categoriesParams.PageSize);
+
+        return filteredCategories;
+    }
 }

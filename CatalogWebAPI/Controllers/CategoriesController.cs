@@ -6,7 +6,6 @@ using CatalogWebAPI.Models;
 using CatalogWebAPI.Pagination;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Xml.Linq;
 
 namespace CatalogWebAPI.Controllers
 {
@@ -24,12 +23,8 @@ namespace CatalogWebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("pagination")]
-        public ActionResult<IEnumerable<Category>> Get([FromQuery]
-                    CategoriesParamaters categoriesParamaters)
+        private ActionResult<IEnumerable<CategoryDTO>> GetCategories(PagedList<Category> categories)
         {
-            var categories = _unitOfWork.CategoryRepository.GetCategories(categoriesParamaters);
-
             var metadata = new
             {
                 categories.TotalCount,
@@ -40,12 +35,30 @@ namespace CatalogWebAPI.Controllers
                 categories.HasPrevious,
             };
 
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata)); 
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
             var categoriesDTO = categories.ToCategoryDTOList();
 
             return Ok(categoriesDTO);
         }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<CategoryDTO>> Get([FromQuery]
+                    CategoriesParamaters categoriesParamaters)
+        {
+            var categories = _unitOfWork.CategoryRepository.GetCategories(categoriesParamaters);
+            return GetCategories(categories);
+        }        
+
+        [HttpGet("filter/name/pagination")]
+        public ActionResult<IEnumerable<CategoryDTO>> GetFilteredCategories([FromQuery] CategoriesFilterName categoriesFilter)
+        {
+            var filteredCategories = _unitOfWork.CategoryRepository.GetCategoriesFilterName(categoriesFilter);
+            var filteredCategoriesDTO = filteredCategories.ToCategoryDTOList();
+
+            return Ok(filteredCategoriesDTO);
+        }
+
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLogginFilter))]
