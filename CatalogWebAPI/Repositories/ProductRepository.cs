@@ -2,6 +2,7 @@
 using CatalogWebAPI.Interfaces;
 using CatalogWebAPI.Models;
 using CatalogWebAPI.Pagination;
+using X.PagedList;
 
 namespace CatalogWebAPI.Repositories;
 
@@ -12,22 +13,20 @@ public class ProductRepository : Repository<Product>, IProductRepository
     {        
     }    
 
-    public PagedList<Product> GetProducts(ProductsParameters productsParams)
+    public async Task<IPagedList<Product>> GetProductsAsync(ProductsParameters productsParams)
     {
-        var products = GetAll().OrderBy(p => p.Id).AsQueryable();
-        var productsOrdered = PagedList<Product>.ToPagedList(products, productsParams.PageNumber, productsParams.PageSize);
+        var products = await GetAllAsync();
 
-        return productsOrdered;
+        var orderedProducts = products.OrderBy(p => p.Id).AsQueryable();
+
+        var resul = await orderedProducts.ToPagedListAsync(productsParams.PageNumber, productsParams.PageSize);
+
+        return resul;
     }
 
-    public IEnumerable<Product> GetProductsByCategory(int id)
+    public async Task<IPagedList<Product>> GetProductsFilterPriceAsync(ProductsFilterPrice productsFilterParams)
     {
-        return GetAll().Where(c => c.Id == id);
-    }
-
-    public PagedList<Product> GetProductsFilterPrice(ProductsFilterPrice productsFilterParams)
-    {
-        var prodcts = GetAll().AsQueryable();
+        var prodcts = await GetAllAsync();
 
         if (productsFilterParams.Price.HasValue && !string.IsNullOrEmpty(productsFilterParams.PriceCriterion))
         {
@@ -44,9 +43,16 @@ public class ProductRepository : Repository<Product>, IProductRepository
                 prodcts = prodcts.Where(p => p.Price == productsFilterParams.Price.Value).OrderBy(p => p.Price);
             }
         }
-        var produtosFiltrados = PagedList<Product>.ToPagedList(prodcts, productsFilterParams.PageNumber,
-                                                                                              productsFilterParams.PageSize);
-        return produtosFiltrados;
+        var productsFiltered = await prodcts.ToPagedListAsync(productsFilterParams.PageNumber, productsFilterParams.PageSize);
+        return productsFiltered;
+    }
+
+    public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int id)
+    {
+        var products = await GetAllAsync();
+        var productsCategory = products.Where(p => p.Id == id);
+
+        return productsCategory;
     }
 }
 

@@ -6,6 +6,7 @@ using CatalogWebAPI.Models;
 using CatalogWebAPI.Pagination;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using X.PagedList;
 
 namespace CatalogWebAPI.Controllers
 {
@@ -23,16 +24,16 @@ namespace CatalogWebAPI.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        private ActionResult<IEnumerable<CategoryDTO>> GetCategories(PagedList<Category> categories)
+        private ActionResult<IEnumerable<CategoryDTO>> GetCategories(IPagedList<Category> categories)
         {
             var metadata = new
             {
-                categories.TotalCount,
+                categories.Count,
                 categories.PageSize,
-                categories.CurrentPage,
-                categories.TotalPages,
-                categories.HasNext,
-                categories.HasPrevious,
+                categories.PageCount,
+                categories.TotalItemCount,
+                categories.HasNextPage,
+                categories.HasPreviousPage
             };
 
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
@@ -43,28 +44,27 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet("pagination")]
-        public ActionResult<IEnumerable<CategoryDTO>> Get([FromQuery]
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery]
                     CategoriesParamaters categoriesParamaters)
         {
-            var categories = _unitOfWork.CategoryRepository.GetCategories(categoriesParamaters);
+            var categories = await _unitOfWork.CategoryRepository.GetCategoriesAsync(categoriesParamaters);
             return GetCategories(categories);
         }        
 
         [HttpGet("filter/name/pagination")]
-        public ActionResult<IEnumerable<CategoryDTO>> GetFilteredCategories([FromQuery] CategoriesFilterName categoriesFilter)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetFilteredCategories(
+                                    [FromQuery] CategoriesFilterName categoriesFilter)
         {
-            var filteredCategories = _unitOfWork.CategoryRepository.GetCategoriesFilterName(categoriesFilter);
-            var filteredCategoriesDTO = filteredCategories.ToCategoryDTOList();
+            var filteredCategories = await _unitOfWork.CategoryRepository.GetCategoriesFilterNameAsync(categoriesFilter);          
 
-            return Ok(filteredCategoriesDTO);
+            return Ok(filteredCategories);
         }
 
 
         [HttpGet]
-        [ServiceFilter(typeof(ApiLogginFilter))]
-        public ActionResult<IEnumerable<CategoryDTO>> GetAll()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
         {
-            var categories = _unitOfWork.CategoryRepository.GetAll();
+            var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
 
             if (categories == null)
                 return NotFound("Não existem Categorias cadastras...");
@@ -75,9 +75,9 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetCategories")]
-        public ActionResult<CategoryDTO> GetById(int id)
+        public async Task<ActionResult<CategoryDTO>> GetById(int id)
         {
-            var category = _unitOfWork.CategoryRepository.Get(c => c.Id == id);
+            var category = await _unitOfWork.CategoryRepository.GetAsync(c => c.Id == id);
 
             if (category is null)
             {
@@ -90,7 +90,7 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult<CategoryDTO> Post(CategoryDTO categoryDTO)
+        public async Task<ActionResult<CategoryDTO>> Post(CategoryDTO categoryDTO)
         {
             if (categoryDTO is null)
             {
@@ -107,7 +107,7 @@ namespace CatalogWebAPI.Controllers
             }
 
             var categoryCreated = _unitOfWork.CategoryRepository.Create(category);  
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
 
             var newCategoryDTO = categoryCreated.ToCategoryDTO();
 
@@ -118,7 +118,7 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
+        public async Task<ActionResult<CategoryDTO>> Put(int id, CategoryDTO categoryDTO)
         {            
             if (id != categoryDTO.Id)
             {
@@ -135,7 +135,7 @@ namespace CatalogWebAPI.Controllers
             }
 
             var categoryUpdated = _unitOfWork.CategoryRepository.Update(category);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
 
             var categoryUpdatedDTO = categoryUpdated.ToCategoryDTO();
 
@@ -143,9 +143,9 @@ namespace CatalogWebAPI.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<CategoryDTO> Delete(int id)
+        public async Task<ActionResult<CategoryDTO>> Delete(int id)
         {
-            var category = _unitOfWork.CategoryRepository.Get(c => c.Id == id);
+            var category = await _unitOfWork.CategoryRepository.GetAsync(c => c.Id == id);
 
             if (category is null)
             {
@@ -154,7 +154,7 @@ namespace CatalogWebAPI.Controllers
             }
 
             var categoryDeleted = _unitOfWork.CategoryRepository.Delete(category);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
 
             var categoryDeletedDTO = categoryDeleted.ToCategoryDTO();
 

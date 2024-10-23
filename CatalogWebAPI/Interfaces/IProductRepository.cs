@@ -1,11 +1,12 @@
 ﻿using CatalogWebAPI.Models;
 using CatalogWebAPI.Pagination;
+using X.PagedList;
 
 namespace CatalogWebAPI.Interfaces;
 
 public interface IProductRepository : IRepository<Product>
 {
-    PagedList<Product> GetProducts(ProductsParameters productsParams);
-    PagedList<Product> GetProductsFilterPrice(ProductsFilterPrice productsFilterParams);
-    IEnumerable<Product> GetProductsByCategory(int id);
+    Task<IPagedList<Product>> GetProductsAsync(ProductsParameters productsParams);
+    Task<IPagedList<Product>> GetProductsFilterPriceAsync(ProductsFilterPrice productsFilterParams);
+    Task<IEnumerable<Product>> GetProductsByCategoryAsync(int id);
 }
